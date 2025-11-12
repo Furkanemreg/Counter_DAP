@@ -85,6 +85,7 @@
 
   <script>
     const contractAddress = "0x47B79351FE93cB2b3eAee9dF2C8b3AC3f75c3cE0";
+
     const abi = [
       {"inputs": [], "stateMutability": "nonpayable", "type": "constructor"},
       {"inputs": [], "name": "counter", "outputs": [{"internalType": "uint256","name":"","type":"uint256"}], "stateMutability":"view","type":"function"},
@@ -104,8 +105,9 @@
           account = accounts[0];
           document.getElementById("account").innerText = account;
 
-          const networkId = await web3.eth.net.getId();
-          if (networkId !== 11155111) {
+          // ✅ Sepolia ağı kontrolü (doğru yöntem)
+          const chainId = await window.ethereum.request({ method: "eth_chainId" });
+          if (chainId !== "0xaa36a7") { // 0xaa36a7 = 11155111 (Sepolia)
             alert("⚠ Lütfen MetaMask'ta Sepolia ağına geçin!");
             document.getElementById("network").innerText = "Yanlış Ağ!";
             return;
@@ -115,13 +117,7 @@
           contract = new web3.eth.Contract(abi, contractAddress);
           document.getElementById("contractAddr").innerText = contractAddress;
 
-          document.getElementById("readBtn").disabled = false;
-          document.getElementById("incBtn").disabled = false;
-          document.getElementById("decBtn").disabled = false;
-          document.getElementById("readBtn").classList.remove("disabled");
-          document.getElementById("incBtn").classList.remove("disabled");
-          document.getElementById("decBtn").classList.remove("disabled");
-
+          enableButtons();
           updateCounter();
         } catch (err) {
           console.error(err);
@@ -130,6 +126,14 @@
       } else {
         alert("MetaMask yüklü değil. Lütfen yükleyin!");
       }
+    }
+
+    function enableButtons() {
+      ["readBtn", "incBtn", "decBtn"].forEach(id => {
+        const btn = document.getElementById(id);
+        btn.disabled = false;
+        btn.classList.remove("disabled");
+      });
     }
 
     async function updateCounter() {
